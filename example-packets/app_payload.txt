@@ -1,0 +1,123 @@
+{
+  "name": "as.up.data.forward",
+  "time": "2021-08-16T14:51:35.862301624Z",
+  "identifiers": [
+    {
+      "device_ids": {
+        "device_id": "eui-a8404173e1827138",
+        "application_ids": {
+          "application_id": "lora-app-1234"
+        }
+      }
+    },
+    {
+      "device_ids": {
+        "device_id": "eui-a8404173e1827138",
+        "application_ids": {
+          "application_id": "lora-app-1234"
+        },
+        "dev_eui": "A8404173E1827138",
+        "join_eui": "17D58B9B66823C46",
+        "dev_addr": "260CFF40"
+      }
+    }
+  ],
+  "data": {
+    "@type": "type.googleapis.com/ttn.lorawan.v3.ApplicationUp",
+    "end_device_ids": {
+      "device_id": "eui-a8404173e1827138",
+      "application_ids": {
+        "application_id": "lora-app-1234"
+      },
+      "dev_eui": "A8404173E1827138",
+      "join_eui": "17D58B9B66823C46",
+      "dev_addr": "260CFF40"
+    },
+    "correlation_ids": [
+      "as:up:01FD7Q4JWQPTNRATTSR8M1F8D6",
+      "gs:conn:01FD7PY1RMY3BEP5PECJ0CHRWJ",
+      "gs:up:host:01FD7PY1XBKX0Q2MW7VS1SE72H",
+      "gs:uplink:01FD7Q4JNQTYVASTTTA16X7X06",
+      "ns:uplink:01FD7Q4JNVTXE446GDFJP225SH",
+      "rpc:/ttn.lorawan.v3.GsNs/HandleUplink:01FD7Q4JNV8D6N63EVYPWJF0ZA",
+      "rpc:/ttn.lorawan.v3.NsAs/HandleUplink:01FD7Q4JWQ45YBDMMTN0F590JG"
+    ],
+    "received_at": "2021-08-16T14:51:35.706091892Z",
+    "uplink_message": {
+      "session_key_id": "AXtPcZi3wveoAXzsyJV6kw==",
+      "decoded_payload": {
+        "ALARM_status": "FALSE",
+        "Altitude": 0,
+        "BatV": 0,
+        "FW": 160,
+        "HDOP": null,
+        "LON": "OFF",
+        "Latitude": 0,
+        "Longitude": 0,
+        "MD": "Disable",
+        "Pitch": 0,
+        "Roll": 0
+      },
+      "rx_metadata": [
+        {
+          "gateway_ids": {
+            "gateway_id": "actual-test-gateway",
+            "eui": "B827EB8C178EFFFF"
+          },
+          "time": "2021-08-16T14:51:35.442705Z",
+          "timestamp": 216643980,
+          "snr": 7.8,
+          "uplink_token": "CiEKHwoTYWN0dWFsLXRlc3QtZ2F0ZXdheRIIuCfrjBeO//8QjPOmZxoMCPf26YgGEMn5vuQBIOCV84enBg==",
+          "channel_index": 2
+        }
+      ],
+      "settings": {
+        "data_rate": {
+          "lora": {
+            "bandwidth": 125000,
+            "spreading_factor": 10
+          }
+        },
+        "coding_rate": "4/5",
+        "frequency": "904300000",
+        "timestamp": 216643980,
+        "time": "2021-08-16T14:51:35.442705Z"
+      },
+      "received_at": "2021-08-16T14:51:35.483633573Z",
+      "consumed_airtime": "0.288768s",
+      "locations": {
+        "frm-payload": {
+          "latitude": 38.04168,
+          "longitude": -84.499185,
+          "altitude": 263,
+          "source": "SOURCE_GPS"
+        }
+      },
+      "network_ids": {
+        "net_id": "000013",
+        "tenant_id": "ttn",
+        "cluster_id": "ttn-nam1"
+      }
+    }
+  },
+  "correlation_ids": [
+    "as:up:01FD7Q4JWQPTNRATTSR8M1F8D6",
+    "gs:conn:01FD7PY1RMY3BEP5PECJ0CHRWJ",
+    "gs:up:host:01FD7PY1XBKX0Q2MW7VS1SE72H",
+    "gs:uplink:01FD7Q4JNQTYVASTTTA16X7X06",
+    "ns:uplink:01FD7Q4JNVTXE446GDFJP225SH",
+    "rpc:/ttn.lorawan.v3.GsNs/HandleUplink:01FD7Q4JNV8D6N63EVYPWJF0ZA",
+    "rpc:/ttn.lorawan.v3.NsAs/HandleUplink:01FD7Q4JWQ45YBDMMTN0F590JG"
+  ],
+  "origin": "ip-10-101-15-40.us-west-1.compute.internal",
+  "context": {
+    "tenant-id": "CgN0dG4="
+  },
+  "visibility": {
+    "rights": [
+      "RIGHT_APPLICATION_TRAFFIC_READ",
+      "RIGHT_APPLICATION_TRAFFIC_READ"
+    ]
+  },
+  "unique_id": "01FD7Q4K1P1B7A3V834MT3ZCHF"
+}
