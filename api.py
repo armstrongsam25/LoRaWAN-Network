@@ -1,12 +1,15 @@
 from flask import Flask, json, request
 from db import *
+import json
+import datetime
 
 app = Flask('LoRaWAN API')
+
+# TODO: Create API keys
 
 #route to create tables
 @app.route('/createtables', methods=['GET'])
 def create_tables():
-    
     result = -1
     result1 = -1
     lora_db = LoRaDB()
@@ -18,7 +21,7 @@ def create_tables():
         return 'Could not create tables\n'
     
 
-#route to reset tables
+# route to reset tables
 @app.route('/resettables', methods=['GET'])
 def reset_tables():
     result =-1
@@ -66,9 +69,6 @@ def register_end_device():
         return "Device Registered.\n", 200
     else:
         return "Could not add device to database\n", 500
-    
-    
-    
 
 # retrieve device info
 @app.route('/getdevice/<string:dev_eui>', methods=['GET'])
@@ -100,21 +100,54 @@ def remove_device(dev_eui):
     else:
         return 'Could not remove device \n'
 
-# get most recent data from device (raw, and processed)
-@app.route('/getdata/<string:dev_eui>', methods=['GET'])
-def get_device_data(dev_eui):
-    return 'todo'
+# get all data from device (processed)
+@app.route('/getalldata/<string:dev_eui>', methods=['GET'])
+def get_all_device_data(dev_eui):
+    lora_db = LoRaDB()
+    result = lora_db.get_all_data_from_device(dev_eui)
+    if result != -1 or result != 0:
+        data = {}
+        for idx in range(0, len(result)):
+            data[idx] = json.loads(result[idx][0].decode())
+        return json.dumps(data, indent=1), 200
+    elif result == 0:
+        return "No data found for device: " + dev_eui + '\n', 404
+    else:
+        return "Could not get device data.\n", 500
 
-# (maybe) set data from device
-@app.route('/setdata/<string:dev_eui>', methods=['POST'])
-def set_device_data(dev_eui):
-    dev_json = request.get_json(force=True)
-    return 'todo'
+# get last data from device (processed)
+@app.route('/getlastdata/<string:dev_eui>', methods=['GET'])
+def get_last_device_data(dev_eui):
+    lora_db = LoRaDB()
+    result = lora_db.get_last_data_from_device(dev_eui)
+    if result != -1 or result != 0:
+        data = json.dumps({"0": json.loads(result[0].decode())}, indent=1)
+        return data, 200
+    elif result == 0:
+        return "No data found for device: " + dev_eui + '\n', 404
+    else:
+        return "Could not get device data.\n", 500
 
 # server status (ie stat messages from concentrator)  
-@app.route('/serverstatus', methods=['GET'])
-def get_server_status():
-    return 'todo'
+@app.route('/serverstatus/<string:net_id>', methods=['GET'])
+def get_server_status(net_id):
+    lora_db = LoRaDB()
+    result = lora_db.get_server_status(net_id.upper())
+    if result != -1 or result != 0:
+        return json.dumps({
+            "net_id": net_id.upper(),
+            "time": result[1].strftime('%Y-%m-%d %H:%M:%S'),
+            "rxnb": result[2],
+            "rxok": result[3],
+            "rxfw": result[4],
+            "ackr": result[5],
+            "dwnb": result[6],
+            "txnb": result[7]
+        }, indent=0)
+    elif result == 0:
+        return "No data found for server: " + net_id + '\n', 404 
+    else:
+        return "Could not get server data.\n", 500
 
 
 if __name__ == '__main__':

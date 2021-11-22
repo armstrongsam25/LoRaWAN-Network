@@ -102,6 +102,8 @@ def GPS_decoder(GPS_data):
 	
 	latitude=(GPS_data[0]<<24 | GPS_data[1]<<16 | GPS_data[2]<<8 | GPS_data[3])/1000000
 	longitude= ((GPS_data[4]<<24 | GPS_data[5]<<16 | GPS_data[6]<<8 | GPS_data[7]) - 4294967296) /1000000 		# 429...  is 0x100000000 in base10
+	if longitude == -4294.967296:
+		longitude = 0.0
 	alarm=True if GPS_data[8] & 0x40 else False
 	batV=(((GPS_data[8] & 0x3f) <<8) | GPS_data[9])/1000
 	

@@ -11,6 +11,9 @@ class LoRaDB:
         self.cursor = -1
 
     def create_tables(self):
+        result = -1
+        result1 = -1
+        result2 = -1
         self.connect()
         if self.is_connected():
             result = self.execute('''
@@ -72,6 +75,7 @@ class LoRaDB:
         return False
 
     def drop_tables(self):
+        result = -1
         self.connect()
         if self.is_connected():
             result = self.execute('DROP TABLE IF EXISTS l_devices', ()) # add more tables here
@@ -81,6 +85,7 @@ class LoRaDB:
         return result, result1, result2
 
     def register_device(self, dev_addr, dev_eui, app_eui, app_key, app_s_key, net_s_key, dev_type):
+        result = -1
         self.connect()
         if self.is_connected():
             result = self.execute('''
@@ -91,6 +96,7 @@ class LoRaDB:
         return result
 
     def get_device(self, dev_eui):
+        result = -1
         self.connect()
         if self.does_table_exist('l_devices') and self.is_connected():
             result = self.executeSelect('SELECT * FROM l_devices WHERE dev_eui = %s', (dev_eui,)) 
@@ -98,19 +104,44 @@ class LoRaDB:
         return result
     
     def get_device_by_addr(self, dev_addr):
+        result = -1
         self.connect()
         if self.does_table_exist('l_devices') and self.is_connected():
             result = self.executeSelect('SELECT app_s_key, dev_type FROM l_devices WHERE dev_addr = %s', (dev_addr,)) 
         self.close()
         return result
     
+    def get_all_data_from_device(self, dev_eui):
+        result = -1
+        self.connect()
+        if self.does_table_exist('l_devices') and self.does_table_exist('l_packets') and self.is_connected():
+            result = self.executeSelectAll('SELECT parseddata FROM l_packets WHERE devaddr IN (SELECT dev_addr FROM l_devices WHERE dev_eui = %s)', (dev_eui,)) 
+        self.close()
+        return result
+    
+    def get_last_data_from_device(self, dev_eui):
+        result = -1
+        self.connect()
+        if self.does_table_exist('l_devices') and self.does_table_exist('l_packets') and self.is_connected():
+            result = self.executeSelect('SELECT parseddata FROM l_packets WHERE devaddr IN (SELECT dev_addr FROM l_devices WHERE dev_eui = %s) ORDER BY time DESC LIMIT 1', (dev_eui,)) 
+        self.close()
+        return result
+    
     def remove_device(self, dev_eui):
+        result = -1
         self.connect()
         if self.does_table_exist('l_devices') and self.is_connected():
             result = self.execute('DELETE FROM l_devices WHERE dev_eui = %s', (dev_eui,))
         self.close()
         return result
 
+    def get_server_status(self, net_id):
+        result = -1
+        self.connect()
+        if self.does_table_exist('l_servers') and self.is_connected():
+            result = self.executeSelect('SELECT * FROM l_servers WHERE net_id = %s', (net_id,)) 
+        self.close()
+        return result
 
     def execute(self, stmt, args):
         try:
@@ -132,8 +163,20 @@ class LoRaDB:
         except Error as e:
             print('[ERROR]\t ', e)
             return -1
+    
+    def executeSelectAll(self, stmt, args):
+        try:
+            self.cursor.execute(stmt, args)
+            result = self.cursor.fetchall()
+            if result == None:
+                return -1
+            return result
+        except Error as e:
+            print('[ERROR]\t ', e)
+            return -1
 
     def insert_data(self, raw_data, data_type, json_data, dev_addr):
+        result = -1
         self.connect()
         if self.is_connected():
             result = self.execute('''

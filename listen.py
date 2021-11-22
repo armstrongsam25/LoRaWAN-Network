@@ -131,7 +131,7 @@ if __name__ == '__main__':
 					except:
 						print('[ERROR]\t There was a problem parsing the packet: ', raw_data)
 			elif "stat" in packet:
-				print('DEBUG]\t Packet: ', packet)
+				print('[DEBUG]\t Packet: ', packet)
 				result1 = -1
 				lora_db = LoRaDB()
 				lora_db.connect()
