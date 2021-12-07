@@ -1,13 +1,5 @@
 <div id="top"></div>
 
-[![Contributors][contributors-shield]][https://github.com/armstrongsam25/LoRaWAN-Network/graphs/contributors]
-[![Forks][forks-shield]][https://github.com/armstrongsam25/LoRaWAN-Network/network/members]
-[![Stargazers][stars-shield]][https://github.com/armstrongsam25/LoRaWAN-Network/stargazers]
-[![Issues][issues-shield]][https://github.com/armstrongsam25/LoRaWAN-Network/issues]
-[![LinkedIn][linkedin-shield]][https://linkedin.com/in/418]
-
-
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -19,7 +11,6 @@
     This project uses a LoRaWAN gateway and 2 end devices to create a proof-of-concept to show how a LoRaWAN network could work.
     <br />
     <br />
-    ·
     <a href="https://github.com/armstrongsam25/LoRaWAN-Network/issues">Report Bug</a>
     ·
     <a href="https://github.com/armstrongsam25/LoRaWAN-Network/issues">Request Feature</a>
