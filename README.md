@@ -1,7 +1,7 @@
 <div id="top"></div>
 
 <div align="center">
-<h3 align="center">A LoRaWan Network Implementation</h3>
+<h1 align="center">A LoRaWan Network Implementation</h1>
 
   <p align="center">
      Long Range Wide Area Network (LoRaWAN) is an emerging technology that uses low-cost, low-energy intermediate gateways between a central network and end devices. Starting in 2009, LoRaWAN has gained popularity and has been deployed in many environments including agriculture, healthcare, and cities. With the tremendous amount of data that is being generated today, LoRaWAN can distribute network traffic and manage networks efficiently by converting radio frequency (RF) packets from various sensors to internet protocol (IP) packets bidirectionally. LoRaWAN has already proven to be a beneficial resource when managing data and providing a low-cost alternative to conventional network computations. 
