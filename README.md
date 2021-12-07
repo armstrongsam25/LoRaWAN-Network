@@ -92,10 +92,8 @@ API Usage:
     curl http://localhost:42069/resettables/
     ```
   
-  * Register an end device (dev_type = 0 if GPS, dev_type = 1 for door sensor)
-  ```sh
-  curl -H 'Content-Type: application/json' -X POST http://localhost:42069/register -d '{"dev_addr": "XXXXXXXX", "dev_eui": "XXXXXXXXXXXXXXXX", "app_eui": "XXXXXXXXXXXXXXXX", "app_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "app_s_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "net_s_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "dev_type": "X"}'
-  ```
+  
+  
    * Get device info
     ```sh
     curl http://localhost:42069/getdevice/<put dev_eui here>
@@ -116,6 +114,11 @@ API Usage:
     ```sh
     curl http://localhost:42069/serverstatus/<put net_id here>
     ```
+    
+    * Register an end device (dev_type = 0 if GPS, dev_type = 1 for door sensor)
+  ```sh
+  curl -H 'Content-Type: application/json' -X POST http://localhost:42069/register -d '{"dev_addr": "XXXXXXXX", "dev_eui": "XXXXXXXXXXXXXXXX", "app_eui": "XXXXXXXXXXXXXXXX", "app_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "app_s_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "net_s_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "dev_type": "X"}'
+  ```
    
 <p align="right">(<a href="#top">back to top</a>)</p>
 
