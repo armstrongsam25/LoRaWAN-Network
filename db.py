@@ -1,6 +1,8 @@
 import mysql.connector
 from mysql.connector import Error
 
+DEBUG = False
+
 class LoRaDB:
     def __init__(self):
         self.host = 'localhost'
@@ -54,7 +56,8 @@ class LoRaDB:
             self.connection = mysql.connector.connect(host=self.host, database=self.dbname, user=self.user, password=self.password)
             if self.connection.is_connected():
                 db_Info = self.connection.get_server_info()
-                print("[DEBUG]\t Connected to MySQL Server version ", db_Info)
+                if DEBUG:
+                    print("[DEBUG]\t Connected to MySQL Server version ", db_Info)
                 self.cursor = self.connection.cursor(prepared=True)
                 return db_Info
 
@@ -192,4 +195,5 @@ class LoRaDB:
             self.cursor = -1
             self.connection.close()
             self.connection = -1
-            print("[DEBUG]\t MySQL connection closed")
+            if DEBUG:
+                print("[DEBUG]\t MySQL connection closed")

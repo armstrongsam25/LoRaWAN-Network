@@ -8,14 +8,11 @@ from binascii import unhexlify
 from db import *
 import time
 
-
-# TODO: add config file
-#		put devices in there
-#		debug flag
-
+DEBUG = False
 
 def print_GPS(GPS_data):
 	print('\n')
+	print('--------Decoded GPS Data--------')
 	print("LAT:\t", GPS_data['Latitude'])
 	print("LON:\t", GPS_data['Longitude'])
 	print("ALARM:\t", GPS_data['Alarm'])
@@ -29,19 +26,28 @@ def print_GPS(GPS_data):
 	#print("HDOP:\t", GPS_data['HDOP'])
 	print('\n')
 
+def print_door(door_data):
+	print('--------Decoded Door Data--------')
+	print("BAT:\t\t\t", door_data['BAT_V'])
+	print("MOD:\t\t\t", door_data['MOD'])
+	print("DOOR OPEN STATUS:\t", door_data['DOOR_OPEN_STATUS'])
+	print("TIMES DOOR OPENED:\t", door_data['DOOR_OPEN_TIMES'])
+	print("LAST DOOR OPEN DURATION\t", door_data['LAST_DOOR_OPEN_DURATION']) # this is in minutes so probably 0
+	print("ALARM:\t\t\t", door_data['ALARM'])
+
 def handle_uplink(payload, raw_payload):
 	# parse the device address from the received data
 	x = int(payload[:8].encode('utf-8'), 16)
 	dev_addr = (((x << 24) & 0xFF000000) | ((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00) |((x >> 24) & 0x000000FF))
 	dev_addr = hex(dev_addr)[2:]
-	if len(dev_addr) == 7: 		#will probably need to change this eventually to handle leading zeros in dev address
+	if len(dev_addr) == 7: 		# TODO will probably need to change this eventually to handle leading zeros in dev address
 		dev_addr = '0' + dev_addr
 	
 	# grab the app_s_key from the db if the device has been registered
 	lora_db = LoRaDB()
 	dev_info = lora_db.get_device_by_addr(dev_addr)
 	if dev_info == -1:
-		print("[INFO]\t Packet with device address:", dev_addr, " not registered with the server.\n")
+		print("[INFO]\t Packet with device address:", dev_addr, " not registered with the server.")
 		return
 	app_s_key = dev_info[0].decode()
 	dev_type = dev_info[1]
@@ -52,27 +58,50 @@ def handle_uplink(payload, raw_payload):
 
 	# parse the FRM_Payload (the gps data is here)
 	FRM_payload = payload[16:]
-	print('[DEBUG]\t FRMPayload: ' + FRM_payload)
-	print('[DEBUG]\t F_CNT: ', f_cnt, ' Payload Length: ', len(payload))
+	if DEBUG:
+		print('[DEBUG]\t FRMPayload: ' + FRM_payload)
+		print('[DEBUG]\t F_CNT: ', f_cnt, ' Payload Length: ', len(payload))
 
 	# decrypt the encrypted packet
 	result = loramac_decrypt(FRM_payload.upper(), f_cnt, app_s_key , dev_addr, direction=0)
 	
-	#if debug:
-	for dec in result:
-		print('{:02x}'.format(dec),"", end='')
-	print('\n')
+	if DEBUG:
+		for dec in result:
+			print('{:02x}'.format(dec),"", end='')
+		print('\n')
 
 	# decode the gps data and print the result if valid
-	try:
-		GPS_data = GPS_decoder(result)
-		print_GPS(GPS_data)
+	if dev_type == 0:
+		print('[INFO]\t Attempting to decode GPS data...')
+		try:
+			GPS_data = GPS_decoder(result)
+			print_GPS(GPS_data)
 
-		GPS_data_json = json.dumps(GPS_data, indent=0)
-		lora_db = LoRaDB()
-		result = lora_db.insert_data(raw_payload, dev_type, GPS_data_json, dev_addr)
-	except:
-		print("\nGPS Location Not Found.\n")
+			GPS_data_json = json.dumps(GPS_data, indent=0)
+			lora_db = LoRaDB()
+			result = lora_db.insert_data(raw_payload, dev_type, GPS_data_json, dev_addr)
+			if result != -1:
+				print('[INFO]\t GPS data uploaded.')
+			else:
+				print('[ERROR]\t GPS data could not be uploaded.')
+		except:
+			print("[ERROR] GPS Location Not Found.")
+	# decode the door data and print the result if valid
+	elif dev_type == 1:
+		print('[INFO]\t Attempting to decode door data...')
+		try:
+			door_data = door_decoder(result)
+			print_door(door_data)
+
+			door_data_json = json.dumps(door_data, indent=0)
+			lora_db = LoRaDB()
+			result = lora_db.insert_data(raw_payload, dev_type, door_data_json, dev_addr)
+			if result != -1:
+				print('[INFO]\t Door data uploaded.')
+			else:
+				print('[ERROR]\t Door data could not be uploaded.')
+		except :
+			print("[ERROR] Could not decrypt door data.")
 
 
 if __name__ == '__main__':
@@ -106,13 +135,14 @@ if __name__ == '__main__':
 				MACPayload = data_from_packet[2:packet_length-8] # from 2nd byte until the length-8th byte
 				MIC = data_from_packet[-8:packet_length] # verify message integrity
 
-				print("+------------------------------------------------------------------+")
-				print('[DEBUG]\t Base64 Data: ', raw_data)
-				print("[DEBUG]\t Data: " + data_from_packet)
-				print("[DEBUG]\t MHDR: " + MHDR)
-				print("[DEBUG]\t MACPayload: " + MACPayload)
-				print("[DEBUG]\t MIC: " + MIC)
-				print("+------------------------------------------------------------------+\n")
+				if DEBUG:
+					print("+------------------------------------------------------------------+")
+					print('[DEBUG]\t Base64 Data: ', raw_data)
+					print("[DEBUG]\t Data: " + data_from_packet)
+					print("[DEBUG]\t MHDR: " + MHDR)
+					print("[DEBUG]\t MACPayload: " + MACPayload)
+					print("[DEBUG]\t MIC: " + MIC)
+					print("+------------------------------------------------------------------+\n")
 				
 				# Bit shift the MHDR to get the type of message being sent
 				end_length = len(MHDR) * 4
@@ -122,16 +152,20 @@ if __name__ == '__main__':
 
 				if MTYPE == "00000000":
 					#Join-Request
-					print("[INFO]\t Received Join-Request")
+					print("[INFO]\t Received Join-Request.")
+					print('\n')
 				elif MTYPE == "00000010":
 					#Unconfirmed Uplink
-					print("[INFO]\t Received Unconfirmed Uplink")
+					print("[INFO]\t Received Unconfirmed Uplink.")
 					try:
 						handle_uplink(MACPayload.upper(), raw_data)
 					except:
 						print('[ERROR]\t There was a problem parsing the packet: ', raw_data)
+					print('\n')
 			elif "stat" in packet:
-				print('[DEBUG]\t Packet: ', packet)
+				print("[INFO]\t Received Server Status.")
+				if DEBUG:
+					print('[DEBUG]\t Packet: ', packet)
 				result1 = -1
 				lora_db = LoRaDB()
 				lora_db.connect()
