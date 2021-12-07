@@ -1,9 +1,6 @@
 <div id="top"></div>
 
-<!-- PROJECT LOGO -->
-<br />
 <div align="center">
-
 <h3 align="center">A LoRaWan Network Implementation</h3>
 
   <p align="center">
@@ -75,50 +72,48 @@ Assuming we are running on a Raspberry Pi on Raspberry Pi OS.
   ```sh
   pip install socket json base64 datetime binascii time flask mysql-connector-python cryptography
   ```
-  * MySQL
-  https://bytesofgigabytes.com/raspberrypi/how-to-install-mysql-database-on-raspberry-pi/
+* MySQL
+https://bytesofgigabytes.com/raspberrypi/how-to-install-mysql-database-on-raspberry-pi/
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
 API Usage:
-  * Create initial tables
+* Create initial tables
     ```sh
     curl http://localhost:42069/createtables/
     ```
-  * Remove initial tables
+* Remove initial tables
     ```sh
     curl http://localhost:42069/resettables/
     ```
-  
-  
-  
-   * Get device info
-    ```sh
-    curl http://localhost:42069/getdevice/<put dev_eui here>
-    ```
-    * Removes device from database
-    ```sh
-    curl http://localhost:42069/removedevice/<put dev_eui here>
-    ```
-    * Get all data from a device
-    ```sh
-    curl http://localhost:42069/getalldata/<put dev_eui here>
-    ```
-    * Get last data from a device
-    ```sh
-    curl http://localhost:42069/getlastdata/<put dev_eui here>
-    ```
-    * Get server status (00DEAD is default net_id)
-    ```sh
-    curl http://localhost:42069/serverstatus/<put net_id here>
-    ```
-    
-    * Register an end device (dev_type = 0 if GPS, dev_type = 1 for door sensor)
+* Register an end device (dev_type = 0 if GPS, dev_type = 1 for door sensor)
   ```sh
   curl -H 'Content-Type: application/json' -X POST http://localhost:42069/register -d '{"dev_addr": "XXXXXXXX", "dev_eui": "XXXXXXXXXXXXXXXX", "app_eui": "XXXXXXXXXXXXXXXX", "app_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "app_s_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "net_s_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "dev_type": "X"}'
   ```
+* Get device info
+    ```sh
+    curl http://localhost:42069/getdevice/your_dev_eui
+    ```
+* Removes device from database
+    ```sh
+    curl http://localhost:42069/removedevice/your_dev_eui
+    ```
+* Get all data from a device
+    ```sh
+    curl http://localhost:42069/getalldata/your_dev_eui
+    ```
+* Get last data from a device
+    ```sh
+    curl http://localhost:42069/getlastdata/your_dev_eui
+    ```
+* Get server status (00DEAD is default net_id)
+    ```sh
+    curl http://localhost:42069/serverstatus/your_net_id
+    ```
+    
+
    
 <p align="right">(<a href="#top">back to top</a>)</p>
 
