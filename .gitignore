@@ -2,3 +2,4 @@ NOTES/*
 join.py
 db.pyc
 notes.txt
+__pycache__/
