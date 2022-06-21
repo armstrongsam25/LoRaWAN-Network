@@ -3,6 +3,8 @@ import base64
 from binascii import unhexlify
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from AES_CMAC import AES_CMAC
+from utils import *
 
 
 def to_bytes(s):
@@ -227,56 +229,105 @@ def door_decoder(door_data):
 		}
 	
 
+# join request
+# Raw data:  AAcBAAAAAACgXpaCYeRBQKh1KvIBoiQ=
+# PHYPayload:  0007010000000000a05e968261e44140a8752af201a224
 
 # if __name__ == '__main__': 
 
-# 	MAC_encoded = 'QPYtDCaADQAC4TDbVPvpwx5lCJ72RxTref2b9GGKsg==' #'QED/DCaACgAClkaBxXHE/bUnR+4TsIlhlMZxD2JdBw==' #44 bytes
+# 	MAC_encoded = 'AAcBAAAAAACgXpaCYeRBQKh1KvIBoiQ=' #'QED/DCaACgAClkaBxXHE/bUnR+4TsIlhlMZxD2JdBw==' #44 bytes
 # 	MAC_decoded = base64.b64decode(MAC_encoded).hex()
 
-# 	# There is probably a better way to do this
-# 	# Flipping byteorder
-# 	x = int(MAC_decoded[2:10].encode('utf-8'), 16)
-# 	dev_addr = (((x << 24) & 0xFF000000) |
-# 			((x <<  8) & 0x00FF0000) |
-# 			((x >>  8) & 0x0000FF00) |
-# 			((x >> 24) & 0x000000FF))
-# 	dev_addr = hex(dev_addr)[2:] #removing the 0x in front
-# 	print("dev_addr: ", dev_addr)
+# 	# first get the MHDR | MACPayload | MIC
+# 	MHDR = MAC_decoded[0:2]
+# 	MAC_payload = MAC_decoded[2:-8]
+# 	MIC = MAC_decoded[-8:]
+	
 
+# 	# Next get the AppEUI | DevEUI | DevNonce
+# 	AppEUI = MAC_payload[:16]
+# 	AppEUI = "".join(reversed([AppEUI[i:i+2] for i in range(0, len(AppEUI), 2)]))
+# 	DevEUI = MAC_payload[16:32]
+# 	DevEUI = "".join(reversed([DevEUI[i:i+2] for i in range(0, len(DevEUI), 2)]))
+# 	DevNonce = MAC_payload[-4:]
+# 	DevNonce = "".join(reversed([DevNonce[i:i+2] for i in range(0, len(DevNonce), 2)]))
 
-# 	print("Encoded MAC: ", MAC_encoded)
-# 	print("Encoded FRMPayload: ", MAC_encoded[12:36])
-# 	print('Decoded FRM: ', base64.b64decode(MAC_encoded[12:36]).hex())
+# 	# Next verify the deveui is registered, and get the AppKey
+# 	# query to database
+# 	## if it isn't display error message
+# 	## if it is then verify MIC
+
+# 	JRM = JoinRequestMessage(MHDR, AppEUI, DevEUI, DevNonce, MIC)
+# 	isMICok = JRM.checkMIC(int('A8B6FDAEA5B91B988DE7B27EA52474FC', 16)) # this is the app key
+# 	#true if good, false if bad
+
+# 	#if MIC OK then form JoinAcceptMessage
 
 	
-# 	# payload = '964681c571c4fdb52747ee13b0896194c671'
-# 	# sequence_counter = 10
-# 	# dev_addr = '260CFF40'
+# 	#appkey, appnonce, netid, devaddr, dlsettings, rxdelay, cflist=[]
+# 	JAM = JoinAcceptMessage(
+# 		int('A8B6FDAEA5B91B988DE7B27EA52474FC', 16),
+# 		int('C28AE9', 16),
+# 		int('00DEAD', 16), 
+# 		int('0182965E', 16),
+# 		0, 
+# 		5
+# 	)
 
-# 	AppSKey = '0916926F27EB9DF453A291CE5687A8D7' #AppSKey changes after each join...
-# 	FRM_payload = base64.b64decode(MAC_encoded[12:36]).hex()
-# 	f_cnt = int(MAC_decoded[12:14], 16)
-# 	print("f_cnt: ", f_cnt)
-# 	FRMPayload_decimal = loramac_decrypt(FRM_payload, f_cnt, AppSKey, dev_addr)
+# 	# derive the netskey and appskey and save in db
+# 	netskey = JRM.derive_skey(0x01, JAM)
+# 	appskey = JRM.derive_skey(0x02, JAM)
+# 	print("NetSKey: ", netskey)
+# 	print("AppSKey: ", appskey)
 
-# 	print("Decoded FRMPayload:")
-# 	for dec in FRMPayload_decimal:
-# 		print('{:02x}'.format(dec),"", end='')
-# 	print('\n')
+# 	# create the join accept message
+# 	print("Join Accept Payload: ", JAM.encode().hex())
 
-# 	GPS_data = GPS_decoder(FRMPayload_decimal)
 
-# 	print("LAT:\t", GPS_data['Latitude'])
-# 	print("LON:\t", GPS_data['Longitude'])
-# 	print("ALT:\t", GPS_data['Altitude'])
-# 	print("ALARM:\t", GPS_data['Alarm'])
-# 	print("BAT:\t", GPS_data['BatV'])
-# 	print("ROLL:\t", GPS_data['Roll'])
-# 	print("PITCH:\t", GPS_data['Pitch'])
-# 	print("MOTION:\t", GPS_data['MD'])
-# 	print("LED:\t", GPS_data['LON'])
-# 	print("FW:\t", GPS_data['FW'])
-# 	print("HDOP:\t", GPS_data['HDOP'])
+	# There is probably a better way to do this
+	# Flipping byteorder
+	# x = int(MAC_decoded[2:10].encode('utf-8'), 16)
+	# dev_addr = (((x << 24) & 0xFF000000) |
+	# 		((x <<  8) & 0x00FF0000) |
+	# 		((x >>  8) & 0x0000FF00) |
+	# 		((x >> 24) & 0x000000FF))
+	# dev_addr = hex(dev_addr)[2:] #removing the 0x in front
+	# print("dev_addr: ", dev_addr)
+
+
+	# print("Encoded MAC: ", MAC_encoded)
+	# print("Encoded FRMPayload: ", MAC_encoded[12:36])
+	# print('Decoded FRM: ', base64.b64decode(MAC_encoded[12:36]).hex())
+
+	
+	# # payload = '964681c571c4fdb52747ee13b0896194c671'
+	# # sequence_counter = 10
+	# # dev_addr = '260CFF40'
+
+	# AppSKey = '0916926F27EB9DF453A291CE5687A8D7' #AppSKey changes after each join...
+	# FRM_payload = base64.b64decode(MAC_encoded[12:36]).hex()
+	# f_cnt = int(MAC_decoded[12:14], 16)
+	# print("f_cnt: ", f_cnt)
+	# FRMPayload_decimal = loramac_decrypt(FRM_payload, f_cnt, AppSKey, dev_addr)
+
+	# print("Decoded FRMPayload:")
+	# for dec in FRMPayload_decimal:
+	# 	print('{:02x}'.format(dec),"", end='')
+	# print('\n')
+
+	# GPS_data = GPS_decoder(FRMPayload_decimal)
+
+	# print("LAT:\t", GPS_data['Latitude'])
+	# print("LON:\t", GPS_data['Longitude'])
+	# print("ALT:\t", GPS_data['Altitude'])
+	# print("ALARM:\t", GPS_data['Alarm'])
+	# print("BAT:\t", GPS_data['BatV'])
+	# print("ROLL:\t", GPS_data['Roll'])
+	# print("PITCH:\t", GPS_data['Pitch'])
+	# print("MOTION:\t", GPS_data['MD'])
+	# print("LED:\t", GPS_data['LON'])
+	# print("FW:\t", GPS_data['FW'])
+	# print("HDOP:\t", GPS_data['HDOP'])
 
 
 

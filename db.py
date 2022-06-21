@@ -26,6 +26,8 @@ class LoRaDB:
                                             app_key CHAR(32) NOT NULL,
                                             app_s_key CHAR(32) NOT NULL,
                                             net_s_key CHAR(32) NOT NULL,
+                                            gen_app_s_key CHAR(32),
+                                            gen_net_s_key CHAR(32),
                                             dev_type INT NOT NULL,
                                             PRIMARY KEY (dev_eui));''',())
             result1 = self.execute('''
@@ -104,6 +106,7 @@ class LoRaDB:
         if self.does_table_exist('l_devices') and self.is_connected():
             result = self.executeSelect('SELECT * FROM l_devices WHERE dev_eui = %s', (dev_eui,)) 
         self.close()
+        
         return result
     
     def get_device_by_addr(self, dev_addr):
@@ -159,9 +162,10 @@ class LoRaDB:
     def executeSelect(self, stmt, args):
         try:
             self.cursor.execute(stmt, args)
-            result = self.cursor.fetchone()
-            if result == None:
+            row = self.cursor.fetchone()
+            if row == None:
                 return -1
+            result = dict(zip(self.cursor.column_names, row))
             return result
         except Error as e:
             print('[ERROR]\t ', e)
@@ -170,9 +174,12 @@ class LoRaDB:
     def executeSelectAll(self, stmt, args):
         try:
             self.cursor.execute(stmt, args)
-            result = self.cursor.fetchall()
-            if result == None:
+            rows = self.cursor.fetchall()
+            if rows == None:
                 return -1
+            result = {}
+            for row in rows:
+                result = dict(zip(self.cursor.column_names, row))
             return result
         except Error as e:
             print('[ERROR]\t ', e)
@@ -186,6 +193,16 @@ class LoRaDB:
                                         INSERT INTO l_packets (time, rawdata, datatype, parseddata, devaddr) 
                                         VALUES (NOW(), %s, %s, %s, %s)
                                     ''', (raw_data, data_type, json_data, dev_addr))
+        self.close()
+        return result
+    
+    def update_dev_skeys(self, dev_eui, netskey, appskey):
+        result = -1
+        self.connect()
+        if self.is_connected():
+            result = self.execute('''
+                                        UPDATE l_devices set gen_app_s_key = %s, gen_net_s_key = %s WHERE dev_eui = %s
+                                    ''', (appskey, netskey, dev_eui))
         self.close()
         return result
     
